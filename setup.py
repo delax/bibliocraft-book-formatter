@@ -5,6 +5,7 @@ from cx_Freeze import setup, Executable
 include_files = [
     './NBTUtil/',
     './big book templates/',
+    './README.md',
     ]
 
 build_exe_options = {
