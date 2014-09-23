@@ -39,7 +39,7 @@ templateDir = Path('./big book templates')
 bigBookTW = textwrap.TextWrapper(
     width=bigBookProperties['max line width'] - 1)
 bookTW = textwrap.TextWrapper(
-    width=bookAndQuillProperties['max page length'] - 1)
+    width=bookAndQuillProperties['avg line width'] - 1)
 
 class TooManyPagesError(Exception):
     """Simple Exception class to handle case of overflow of pages into one big book."""
@@ -71,7 +71,7 @@ def _set_NBT_value(filename, tagpath, newvalue):
 # A full blank book is 74.7KB
 def write_big_book(lines, author='author', title='title', allowMultipleBooks=False,
                    signed=True, output_dir=Path('./')):
-    """Write a big book dat file using NBTUtil."""
+    """Write a big book info and dat file using NBTUtil."""
 
     booksizes = _get_template_sizes()
     
@@ -143,39 +143,31 @@ def big_book_wrap(book):
         lines.extend(newlines)
     return lines
 
-###TODO Try wrap to lines instead of pages?
-##def book_wrap2((book, title='title', author='author',
-##              replace_whitespace=False, textonly=False):
-##  """Output a valid BiblioCraft Vanilla Signed Book file"""
-##  pass
+def book_wrap(book):
+    """Word wrap given book's text to fit a vanilla Book's lines."""
+    paragraphs = book.splitlines()
+    lines = list()
+    for paragraph in paragraphs:
+        newlines = bookTW.wrap(paragraph)
+        if len(newlines) == 0:
+            newlines.append('')
+        lines.extend(newlines)
+    return lines
 
-def book_wrap(book, title='title', author='author',
-              replace_whitespace=False, textonly=False):
-    """Output a valid BiblioCraft Vanilla Signed Book file"""
-    bookTW.replace_whitespace = replace_whitespace
-    # TODO pre-process/post-process text to more accurately fit Minecraft book
-    if not replace_whitespace:
-        # newlines count as 2 characters to limit, so replace w/ two special symbols
-        # TODO too many newlines can push displayed text too far down,
-        #      replace newlines w/ 19 (about 1 line's worth) special symbols?
-        pass
-
-    lines = bookTW.wrap(book)
-
-    if not replace_whitespace:
-        # trim trailing/preceeding newline symbol pairs
-        # trim any wrapped (thus broken) newline symbol pairs
-        # replace newline symbol pairs with newline ('\n')
-        pass
-    
-    if textonly:
-        return '\n'.join(lines if isinstance(lines, list) else [lines])
-    else:
-        return '\n'.join(
-            [title, author, 'public'] +
-            ['#pgx{num}\n{text}'.format(num=i, text=text)
-             for i,text in enumerate(lines if isinstance(lines, list) else [lines])]
+def book_write(lines, author='author', title='title', output_dir=Path('./')):
+    """Output a valid vanilla book, given properly sized lines of text."""
+    book = '\n'.join([title, author, 'public'])
+    for firstline in range(0,len(lines),bookAndQuillProperties['max number of lines per page']):
+        pagenum = firstline // bookAndQuillProperties['max number of lines per page']
+        book += '\n'.join(
+            ['\n#pgx%s' % pagenum]
+            + lines[
+                firstline :
+                firstline + min(bookAndQuillProperties['max number of lines per page'], len(lines) - firstline)
+                ]
             )
+    with output_dir.joinpath('{}, {}'.format(author, title)).open('w') as b:
+        b.write(book)
     
 
 if __name__ == '__main__':
@@ -217,15 +209,13 @@ if __name__ == '__main__':
             raise FileNotFoundError(output_dir)
     
     if args.vanilla:
-        text = book_wrap(book, title=args.title, author=args.author,
-                         textonly=args.textonly)
+        lines = book_wrap(book)
         if args.textonly:
             with args.output_dir.joinpath('vanilla {}, {}.txt'.format(args.author, args.title)).open('w') as b:
-                b.write(text)
+                b.write('\n'.join(lines))
             print('Vanilla book formatted file written (copy-paste into Minecraft)')
         else:
-            with args.output_dir.joinpath('{}, {}'.format(args.author, args.title)).open('w') as b:
-                b.write(text)
+            book_write(lines, title=args.title, author=args.author, output_dir=args.output_dir)
             print('Vanilla book file written (move file to \'minecraft\\config\\books\')')
     elif args.bigbook:
         lines = big_book_wrap(book)
