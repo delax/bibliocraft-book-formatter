@@ -14,7 +14,7 @@ build_exe_options = {
 
 setup(
     name = 'bibliocraft_book_formatter',
-    version = '0.1',
+    version = '1.0',
     description = 'Write BiblioCraft compatible books from plain text.',
     options = {'build_exe' : build_exe_options},
     executables = [Executable('bibliocraft_book_formatter.py')],
