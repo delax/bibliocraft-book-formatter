@@ -62,15 +62,17 @@ def _get_template_sizes(path=templateDir):
 def _set_NBT_value(filename, tagpath, newvalue):
     """quick helper function to call NBTUtil.exe concisely"""
     path = Path(filename) / Path(*tagpath)
-    return subprocess.check_call(
+    return subprocess.check_output(
         ['NBTUtil/NBTUtil.exe', '--path=%s' % path, '--setvalue=%s' % newvalue],
         timeout=5,
+        stderr=subprocess.STDOUT,
+        universal_newlines=True,
         )
 
 # TODO Minecraft raises error when .dat file is > 32KB, and a 46 page book was > 100KB.
 # A full blank book is 74.7KB
-def write_big_book(lines, author='author', title='title', allowMultipleBooks=False,
-                   signed=True, output_dir=Path('./')):
+def big_book_write(lines, author='author', title='title', allowMultipleBooks=False,
+                   signed=True, output_dir=Path('./'), outputfunc=print):
     """Write a big book info and dat file using NBTUtil."""
 
     booksizes = _get_template_sizes()
@@ -90,7 +92,7 @@ def write_big_book(lines, author='author', title='title', allowMultipleBooks=Fal
     
     # for every book needed
     for booknum, startline in enumerate(range(0, len(lines), maxLinesPerBook)):
-        print('\twriting book %s' % booknum)
+        outputfunc('\twriting book %s' % booknum)
         # calculate properties
         linesslice = slice(startline, startline + min(maxLinesPerBook, len(lines) - startline))
 
@@ -106,11 +108,11 @@ def write_big_book(lines, author='author', title='title', allowMultipleBooks=Fal
             bigBookProperties['info filename template'].format(**bookinfo))
         datFilename = output_dir.joinpath(
             bigBookProperties['dat filename template'].format(**bookinfo))
-        print('\tcreating info file "%s"' % infoFilename)
+        outputfunc('\tcreating info file "%s"' % infoFilename)
         with infoFilename.open('w') as info:
             info.write(infoTemplate.format(**bookinfo))
 
-        print('\tcopying dat file "%s"' % datFilename)
+        outputfunc('\tcopying dat file "%s"' % datFilename)
         shutil.copy(
             str(templateDir.joinpath(
                 'dat template %s.dat' %
@@ -119,17 +121,17 @@ def write_big_book(lines, author='author', title='title', allowMultipleBooks=Fal
             str(datFilename),
             )
 
-        print('\twriting dat file "%s"' % datFilename)
-        _set_NBT_value(datFilename, ['author'], bookinfo['author'])
-        _set_NBT_value(datFilename, ['display', 'Name'], bookinfo['title'])
+        outputfunc('\twriting dat file "%s"' % datFilename)
+        outputfunc(_set_NBT_value(datFilename, ['author'], bookinfo['author']))
+        outputfunc(_set_NBT_value(datFilename, ['display', 'Name'], bookinfo['title']))
         if not signed:
-            _set_NBT_value(datFilename, ['signed'], int(signed))
-        _set_NBT_value(datFilename, ['pagesTotal'], bookinfo['numpages'])
+            outputfunc(_set_NBT_value(datFilename, ['signed'], int(signed)))
+        outputfunc(_set_NBT_value(datFilename, ['pagesTotal'], bookinfo['numpages']))
         # call NBTUtil.exe to write everything in .dat file
         for i, text in enumerate(lines[linesslice]):
             pagenum, linenum = divmod(i, bigBookProperties['max number of lines per page'])
             if text:
-                _set_NBT_value(datFilename, ['pages', 'page%s' % pagenum, '%s' % linenum], text)
+                outputfunc(_set_NBT_value(datFilename, ['pages', 'page%s' % pagenum, '%s' % linenum], text))
         
 
 def big_book_wrap(book):
@@ -169,8 +171,7 @@ def book_write(lines, author='author', title='title', output_dir=Path('./')):
     with output_dir.joinpath('{}, {}'.format(author, title)).open('w') as b:
         b.write(book)
     
-
-if __name__ == '__main__':
+def create_arg_parser():
     parser = argparse.ArgumentParser(
         description='Format a text file to either of the BiblioCraft ' \
         + 'compatible book files, Vanilla or Big book. Can also output a text only' \
@@ -193,6 +194,12 @@ if __name__ == '__main__':
                                       'These flags really only make a difference on big books.')
     bigbookgroup.add_argument('--unsigned', action='store_true',
                               help='set book to unsigned (aka editable)')
+
+    return parser
+
+if __name__ == '__main__':
+
+    parser=create_arg_parser()
 
     args = parser.parse_args()
 
@@ -224,6 +231,6 @@ if __name__ == '__main__':
                 b.write('\n'.join(lines))
             print('Big book formatted file written (copy-paste into Minecraft)')
         else:
-            write_big_book(lines, title=args.title, author=args.author,
+            big_book_write(lines, title=args.title, author=args.author,
                            signed=not args.unsigned, output_dir=args.output_dir)
             print('Big book file written (move file to \'minecraft\\config\\books\')')
