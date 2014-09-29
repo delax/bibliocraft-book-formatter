@@ -3,7 +3,9 @@ bibliocraft-book-formatter
 
 Write BiblioCraft compatible books from plain text.
 
-Required libraries: cx_Freeze
+Uses Python 3.4+
+
+Required libraries to build: [cx_Freeze](http://cx-freeze.sourceforge.net/)
 
 To build: `setup.py build`
 
