@@ -3,14 +3,29 @@ bibliocraft-book-formatter
 
 Write BiblioCraft compatible books from plain text.
 
-Uses Python 3.4+
+Uses [Python 3.4+](http://python.org/) and NBTUtil from [NBTExplorer](https://github.com/jaquadro/NBTExplorer)
 
-Required libraries to build: [cx_Freeze](http://cx-freeze.sourceforge.net/)
+NBTUtil uses .NET/Mono, for more info read its own page.
 
-To build: `setup.py build`
+## Running:
 
-To run gui: `formatter_gui.py` or `formatter_gui.exe`
+### Built version:
+* Usage:
+  * To run gui: use `formatter_gui.exe`
+  * To run terminal: `bibliocraft_book_formatter.exe`
+    * For terminal's built-in help: `bibliocraft_book_formatter.exe --help`
 
-To run terminal: `bibliocraft_book_formatter.py` or `bibliocraft_book_formatter.exe`
+### Unbuilt version:
+* Requires:
+  * Python 3.4+
+* Usage:
+  * To run gui: `formatter_gui.py`
+  * To run terminal: `bibliocraft_book_formatter.py`
+    * For terminal's built-in help: `bibliocraft_book_formatter.py --help`
 
-For terminal's built-in help: `bibliocraft_book_formatter.py --help` or `bibliocraft_book_formatter.exe --help`
+## Building
+* Requires:
+  * Python 3.4+
+  * [cx_Freeze](http://cx-freeze.sourceforge.net/)
+* Usage:
+  * To build: `setup.py build`
