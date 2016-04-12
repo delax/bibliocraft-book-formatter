@@ -1,7 +1,7 @@
 bibliocraft-book-formatter
 ==========================
 
-Write BiblioCraft compatible books from plain text.
+Write [BiblioCraft](http://www.bibliocraftmod.com/) compatible books from plain text.
 
 Uses [Python 3.4+](http://python.org/) and NBTUtil from [NBTExplorer](https://github.com/jaquadro/NBTExplorer)
 
