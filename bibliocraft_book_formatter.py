@@ -213,7 +213,7 @@ if __name__ == '__main__':
             args.output_dir.mkdir()
             print('"%s" created.' % args.output_dir)
         else:
-            raise FileNotFoundError(output_dir)
+            raise FileNotFoundError(args.output_dir)
     
     if args.vanilla:
         lines = book_wrap(book)
