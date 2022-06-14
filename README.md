@@ -1,7 +1,7 @@
 bibliocraft-book-formatter
 ==========================
 
-Write [BiblioCraft](http://www.bibliocraftmod.com/) compatible books from plain text.
+Write [BiblioCraft](http://www.bibliocraftmod.com/) compatible books from plain text, seems to prefer ANSI encoding.
 
 Uses [Python 3.4+](http://python.org/) and NBTUtil from [NBTExplorer](https://github.com/jaquadro/NBTExplorer)
 
@@ -10,6 +10,8 @@ NBTUtil uses .NET/Mono, for more info read its own page.
 ## Running:
 
 ### Built version:
+* Requires:
+  * Nothing! Download [latest](https://github.com/delax/bibliocraft-book-formatter/releases/latest) and run 
 * Usage:
   * To run gui: use `formatter_gui.exe`
   * To run terminal: `bibliocraft_book_formatter.exe`
